@@ -4,60 +4,41 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
 using StepStateMachine;
+using System;
 
-public class StepStateMachinePanel : MonoBehaviour {
-
-    public event UnityAction OnDelete;
-    public static StepStateMachinePanel Instence;
-
+public class StepStateMachinePanel : MonoBehaviour
+{
     [SerializeField] private Button m_lastBtn;
     [SerializeField] private Button m_nextBtn;
-    [SerializeField] private Button m_returnBtn;
-
-  
-  
-    //[HideInInspector]
-    //public BeamSystem beamSystem;
-    //[HideInInspector]
-    //public SteelSystem steelSystem;
-    [HideInInspector]
-    public Camera systemCamera;
-    private StepController stepCtrl;
     [SerializeField] private Toggle[] m_Toggles;
+    private StepMachine stepMachine;
 
-    void Awake(){
-        Instence = this;
+    void Awake()
+    {
+        stepMachine = StepMachine.CreateNewStepMachine(m_Toggles);
+        m_lastBtn.onClick.AddListener(()=>stepMachine.OnLast());
+        m_nextBtn.onClick.AddListener(() => stepMachine.OnNext());
+        stepMachine.onStepChanged = OnStepChanged;
+        stepMachine.RegistStep(new InputStep(0));
+        stepMachine.ReStartMachine();
+    }
 
-        m_lastBtn.onClick.AddListener(stepCtrl.OnLastButtonClicked);
-        m_nextBtn.onClick.AddListener(stepCtrl.OnNextButtonClicked);
-        m_returnBtn.onClick.AddListener(OnBackButtonClicked);
-        for (int i = 0; i < m_Toggles.Length; i++)
+    private void OnStepChanged(int arg0)
+    {
+        m_lastBtn.gameObject.SetActive(arg0 != 0);
+        m_nextBtn.gameObject.SetActive(arg0 != (m_Toggles.Length - 1));
+    }
+
+    private void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.A))
         {
-            int index = i;
-            m_Toggles[index].onValueChanged.AddListener((x) => { if (x) stepCtrl. SetTogActive(index); });
+            InputStep.completeID = 1;
         }
-        //Facade.Instance.SendNotification<ExpState>(AppFixed.AppCommand.EXPSTATECHANGED, ExpState.Choise);
+        else if (Input.GetKeyDown(KeyCode.B))
+        {
+            InputStep.completeID = 2;
+        }
     }
 
-    private void Start()
-    {
-        stepCtrl.SetTogActive(0);
-    }
-
-    public void HideBackGround(bool isOn)
-    {
-        Image image = GetComponent<Image>();
-        image.enabled = !isOn;
-    }
-    private void OnBackButtonClicked()
-    {
-        //Facade.Instance.SendNotification(AppFixed.ExperimentEvents.OPENCAMERA, false);
-        //Facade.Instance.SendNotification(AppFixed.ExperimentEvents.OPENMENU);
-        Destroy(gameObject);
-    }
-    
-    private void OnDestroy()
-    {
-        OnDelete.Invoke();
-    }
 }
