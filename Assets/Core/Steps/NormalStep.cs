@@ -6,27 +6,27 @@ using System.Collections.Generic;
 
 namespace StepStateMachine
 {
-    public class NormalStep: IStep
+    public class DefultStep : IStep
     {
         public int Index { get; private set; }
 
-        public NormalStep(int index)
+        public DefultStep(int index)
         {
             this.Index = index;
         }
         public void OnStepActive()
         {
-            Debug.Log("StepActive:" + Index);
         }
-        public virtual bool OnLast()
+
+        public bool OnLast()
         {
             return true;
         }
-        public virtual bool OnNext()
+        public bool OnNext()
         {
             return true;
         }
-        public virtual bool IsComplete()
+        public bool IsComplete()
         {
             return true;
         }

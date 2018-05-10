@@ -9,21 +9,18 @@ namespace StepStateMachine
     public class StepMachine
     {
         public UnityAction<int> onStepChanged { get; set; }
-        private List<IStep> stepList = new List<IStep>();
-        private Toggle[] toggles;
-        private int _togIndex = 0;
-        private string woring;
-        private bool isSettingTogState;
-        private StepMachine() { }
-        public static StepMachine current { get; private set; }
-
-        public static StepMachine CreateNewStepMachine(Toggle[] toggles)
+        protected List<IStep> stepList = new List<IStep>();
+        protected Toggle[] toggles;
+        protected int _togIndex = 0;
+        protected string woring;
+        protected bool isSettingTogState;
+        public StepMachine() { }
+     
+        public StepMachine(Toggle[] toggles)
         {
-            current = new StepMachine(toggles);
-            return current;
+            RegistToggleArray(toggles);
         }
-
-        private StepMachine(Toggle[] toggles)
+        public void RegistToggleArray(Toggle[] toggles)
         {
             this.toggles = toggles;
             for (int i = 0; i < toggles.Length; i++)
@@ -37,7 +34,7 @@ namespace StepStateMachine
             }
         }
 
-        public void ReStartMachine()
+        public virtual void ReStartMachine()
         {
             _togIndex = 0;
             SetToggleActiveState(0,true);
@@ -46,7 +43,7 @@ namespace StepStateMachine
         /// <summary>
         /// 上一步
         /// </summary>
-        public bool OnLast()
+        public virtual bool OnLast()
         {
             var step = GetCurrentStep();
             if (_togIndex > 0)
@@ -62,7 +59,7 @@ namespace StepStateMachine
         /// <summary>
         /// 下一步
         /// </summary>
-        public bool OnNext()
+        public virtual bool OnNext()
         {
             var step = GetCurrentStep();
             if (_togIndex < toggles.Length - 1)
@@ -77,7 +74,7 @@ namespace StepStateMachine
             return false;
         }
 
-        public void SetToggleActiveState(int id,bool trigger)
+        public virtual void SetToggleActiveState(int id,bool trigger)
         {
             if (id >= 0 && id < toggles.Length)
             {
@@ -92,10 +89,9 @@ namespace StepStateMachine
             }
         }
 
-        public void RegistStep(IStep step)
+        public virtual void RegistStep(IStep step)
         {
             if (step == null) return;
-
             var lastOne = stepList.Find(x => x.Index == step.Index);
             if (lastOne != null)
             {
@@ -111,18 +107,18 @@ namespace StepStateMachine
             }
         }
 
-        public IStep GetCurrentStep()
+        public virtual IStep GetCurrentStep()
         {
             var step = stepList.Find(x => x.Index == _togIndex);
             if (step == null)
             {
-                step = new NormalStep(_togIndex);
+                step = new DefultStep (_togIndex);
                 stepList.Add(step);
             }
             return step;
         }
 
-        private void OnToggleActived(int id)
+        protected virtual void OnToggleActived(int id)
         {
             if (_togIndex < id)
             {
@@ -130,12 +126,10 @@ namespace StepStateMachine
                 {
                     if (!OnNext())
                     {
-                        Debug.Log("!OnNext");
                         SetToggleActiveState(i,false);
                         break;
                     }
                 }
-                OnStepActive();
             }
             else if (_togIndex > id)
             {
@@ -147,19 +141,20 @@ namespace StepStateMachine
                         break;
                     }
                 }
-                OnStepActive();
             }
+
+            OnStepActive();
+        }
+
+        protected virtual void OnStepActive()
+        {
+            var step = GetCurrentStep();
+            step.OnStepActive();
 
             if (onStepChanged != null)
             {
                 onStepChanged.Invoke(_togIndex);
             }
-        }
-
-        private void OnStepActive()
-        {
-            var step = GetCurrentStep();
-            step.OnStepActive();
         }
     }
 }

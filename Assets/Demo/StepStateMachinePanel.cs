@@ -15,7 +15,7 @@ public class StepStateMachinePanel : MonoBehaviour
 
     void Awake()
     {
-        stepMachine = StepMachine.CreateNewStepMachine(m_Toggles);
+        stepMachine =new StepMachine(m_Toggles);
         m_lastBtn.onClick.AddListener(()=>stepMachine.OnLast());
         m_nextBtn.onClick.AddListener(() => stepMachine.OnNext());
         stepMachine.onStepChanged = OnStepChanged;

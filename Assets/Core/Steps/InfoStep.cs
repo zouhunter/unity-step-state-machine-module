@@ -8,8 +8,8 @@ namespace StepStateMachine
 {
     public abstract class InfoStep : IStep
     {
-        public int Index { get; private set; }
-        protected abstract string[] subSteps { get; }
+        public int Index { get;private set; }
+        protected virtual string[] subSteps { get;set; }
         protected abstract int stepCompleteID { get; }//1,2
 
         public InfoStep(int index)
