@@ -5,44 +5,27 @@ using System.Collections;
 using System.Collections.Generic;
 using StepStateMachine;
 
-public class InputStep : InfoStep
+public class InputStep : SubListStep
 {
-    public static string[] keyWords = { "A", "B" };
-    public static int completeID;
-
-    public InputStep(int index):base(index)
+    public InputStep(int index,params string[] steps):base(index)
     {
-
+        this.SubSteps = steps;
     }
-    protected override string[] subSteps
+    public override bool CanLast()
     {
-        get
-        {
-            return keyWords;
-        }
-    }
-    protected override int stepCompleteID { get { return completeID; } }
-
-    public override void OnStepActive()
-    {
-        Debug.Log("开始进行InputStep步骤,可以在此打开其他面板!");
-        completeID = 0;
-    }
-    public override bool OnLast()
-    {
-        var canLast = base.OnLast();
+        var canLast = base.CanLast();
         if(!canLast){
-            completeID--;
+            StepCompleteID--;
             return false;
         }
         return true;
     }
-    public override bool OnNext()
+    public override bool CanNext()
     {
-        var conNext = base.OnNext();
+        var conNext = base.CanNext();
         if(!conNext)
         {
-            Debug.Log("请输入:" + GetCurrentStep());
+            Debug.Log("请输入:" + CurrentInnerStep);
             return false;
         }
         return true;
