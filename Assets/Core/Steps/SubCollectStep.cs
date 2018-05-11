@@ -55,7 +55,14 @@ namespace StepStateMachine
                 if (!completed.Contains(keyword))
                 {
                     completed.Add(keyword);
+
+                    if (onStateChanged != null)
+                    {
+                        onStateChanged.Invoke();
+                    }
                 }
+
+              
             }
         }
 

@@ -15,7 +15,7 @@ namespace StepStateMachine
         public UnityAction onReset { get; set; }
         public UnityAction onStateChanged { get; set; }
 
-        public StepMachine Machine{ get; protected set; }
+        public StepMachine Mechine{ get; protected set; }
 
         protected int StepCompleteID { get;  set; }//1,2
         protected virtual string[] SubSteps { get; set; }
@@ -51,7 +51,7 @@ namespace StepStateMachine
 
         public virtual void OnRegisted(StepMachine stepMachine)
         {
-            this.Machine = stepMachine;
+            this.Mechine = stepMachine;
         }
 
         public virtual void OnStepActive() { }
@@ -94,16 +94,25 @@ namespace StepStateMachine
             if (stepID >= 0 && SubSteps.Length > stepID)
             {
                 StepCompleteID = stepID + 1;
+
+                if(onStateChanged != null)
+                {
+                    onStateChanged.Invoke();
+                }
             }
+
         }
 
         public virtual void OnReset()
         {
             StepCompleteID = 0;
+
             if (onReset != null)
             {
                 onReset.Invoke();
             }
+
+           
         }
 
         public virtual void OnUnRegisted() { }
