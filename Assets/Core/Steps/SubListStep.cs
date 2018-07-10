@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEngine.Events;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
 namespace StepStateMachine
 {
@@ -11,34 +12,53 @@ namespace StepStateMachine
     /// </summary>
     public abstract class SubListStep : IStep
     {
+        private string name;
         public int Index { get; protected set; }
         public UnityAction onReset { get; set; }
         public UnityAction onStateChanged { get; set; }
 
         public StepMachine Mechine{ get; protected set; }
 
-        protected int StepCompleteID { get;  set; }//1,2
+        protected int completedID { get;  set; }//1,2
         protected virtual string[] SubSteps { get; set; }
         public string CurrentInnerStep
         {
             get
             {
-                if (SubSteps == null || SubSteps.Length < StepCompleteID)
+                if (SubSteps == null || SubSteps.Length < completedID)
                 {
                     return null;
                 }
-                if (StepCompleteID == SubSteps.Length)
+                if (completedID == SubSteps.Length)
                 {
                     return null;
                 }
                 else
                 {
-                    return SubSteps[StepCompleteID];
+                    return SubSteps[completedID];
                 }
             }
 
         }
 
+        public int Current
+        {
+            get
+            {
+                return completedID;
+            }
+        }
+        public virtual string Name
+        {
+            get
+            {
+                return name;
+            }
+            set
+            {
+                name = value;
+            }
+        }
         public SubListStep(int index)
         {
             this.Index = index;
@@ -58,11 +78,11 @@ namespace StepStateMachine
 
         public virtual bool CanLast()
         {
-            if(SubSteps == null || SubSteps.Length < StepCompleteID)
+            if(SubSteps == null || SubSteps.Length < completedID)
             {
                 return true;
             }
-            if (StepCompleteID == 0)
+            if (completedID == 0)
             {
                 return true;
             }
@@ -74,11 +94,11 @@ namespace StepStateMachine
 
         public virtual bool CanNext()
         {
-            if (SubSteps == null || SubSteps.Length < StepCompleteID)
+            if (SubSteps == null || SubSteps.Length < completedID)
             {
                 return true;
             }
-            if(StepCompleteID == SubSteps.Length)
+            if(completedID == SubSteps.Length)
             {
                 return true;
             }
@@ -93,7 +113,7 @@ namespace StepStateMachine
         {
             if (stepID >= 0 && SubSteps.Length > stepID)
             {
-                StepCompleteID = stepID + 1;
+                completedID = stepID + 1;
 
                 if(onStateChanged != null)
                 {
@@ -105,7 +125,7 @@ namespace StepStateMachine
 
         public virtual void OnReset()
         {
-            StepCompleteID = 0;
+            completedID = 0;
 
             if (onReset != null)
             {

@@ -15,7 +15,7 @@ namespace StepStateMachine
         protected int _togIndex = 0;
         protected string woring;
         protected bool isSettingTogState;
-        public int noModifyIndex;
+        protected int maxReached { get; set; }
         public IStep currentStep
         {
             get
@@ -23,8 +23,23 @@ namespace StepStateMachine
                 return stepList[_togIndex];
             }
         }
+        public IStep this[int index]
+        {
+            get
+            {
+                if (index >= 0 && index < stepList.Count)
+                {
+                    return stepList[index];
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
         public StepMachine() { }
-     
+
         public StepMachine(Toggle[] toggles)
         {
             RegistToggleArray(toggles);
@@ -47,7 +62,7 @@ namespace StepStateMachine
         public virtual void ReStartMachine()
         {
             _togIndex = 0;
-            SetToggleActiveState(0,true);
+            SetToggleActiveState(0, true);
         }
         /// <summary>
         /// 上一步
@@ -63,7 +78,7 @@ namespace StepStateMachine
             {
                 if (step.CanLast())
                 {
-                    SetToggleActiveState(--_togIndex,true);
+                    SetToggleActiveState(--_togIndex, true);
                     return true;
                 }
             }
@@ -83,7 +98,7 @@ namespace StepStateMachine
             {
                 if (step.CanNext())
                 {
-                    SetToggleActiveState(++_togIndex,true);
+                    SetToggleActiveState(++_togIndex, true);
                     return true;
                 }
 
@@ -91,13 +106,16 @@ namespace StepStateMachine
             return false;
         }
 
-        public virtual void SetToggleActiveState(int id,bool trigger)
+        public virtual void SetToggleActiveState(int id, bool trigger)
         {
+            if (maxReached < id) maxReached = id;
+
             if (id >= 0 && id < toggles.Length)
             {
                 _togIndex = id;
 
-                if (!trigger){
+                if (!trigger)
+                {
                     isSettingTogState = true;
                 }
 
@@ -147,24 +165,26 @@ namespace StepStateMachine
 
         protected virtual void OnToggleActived(int id)
         {
+            if (maxReached < id) maxReached = id;
+
             if (_togIndex < id)
             {
                 for (int i = _togIndex; i < id; i++)
                 {
                     if (!OnNext())
                     {
-                        SetToggleActiveState(i,false);
+                        SetToggleActiveState(i, false);
                         break;
                     }
                 }
             }
             else if (_togIndex > id)
             {
-                for (int i = _togIndex ; i > id; i--)
+                for (int i = _togIndex; i > id; i--)
                 {
                     if (!OnLast())
                     {
-                        SetToggleActiveState(i,false);
+                        SetToggleActiveState(i, false);
                         break;
                     }
                 }
@@ -190,19 +210,19 @@ namespace StepStateMachine
 
         protected virtual void OnStateChanged()
         {
-            if (noModifyIndex > _togIndex + 1)
+            if (maxReached > _togIndex)
             {
-                for (int i = _togIndex + 1; i < noModifyIndex; i++)
+                for (int i = maxReached; i > _togIndex; i--)
                 {
                     var step = stepList[i];
                     step.OnReset();
+                    Debug.Log("reset step:" + step.Name);
                 }
+                maxReached = _togIndex;
             }
-
-            noModifyIndex = _togIndex + 1;
         }
 
-        protected bool IsStepEmpty(IStep step,string error)
+        protected bool IsStepEmpty(IStep step, string error)
         {
             if (step == null)
             {

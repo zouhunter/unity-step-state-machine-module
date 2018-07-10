@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEngine.Events;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
 namespace StepStateMachine
 {
@@ -11,6 +12,7 @@ namespace StepStateMachine
     /// </summary>
     public abstract class SubCollectStep : IStep
     {
+        private string name;
         public int Index { get; private set; }
         public UnityAction onReset { get; set; }
         public UnityAction onStateChanged { get; set; }
@@ -20,6 +22,25 @@ namespace StepStateMachine
         protected List<string> completed = new List<string>();
         protected virtual string[] SubSteps { get; set; }
 
+        public int Current
+        {
+            get
+            {
+                return completed.Count;
+            }
+        }
+
+        public virtual string Name
+        {
+            get
+            {
+                return name;
+            }
+            set
+            {
+                name = value;
+            }
+        }
         public SubCollectStep(int index)
         {
             this.Index = index;

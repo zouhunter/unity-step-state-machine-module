@@ -9,8 +9,10 @@ namespace StepStateMachine
     public interface IStep
     {
         int Index { get; }
+        int Current { get; }
         UnityAction onReset { get; set; }
         UnityAction onStateChanged { get; set; }
+        string Name { get; set; }
 
         void OnRegisted(StepMachine stepMachine);
         void OnUnRegisted();
